@@ -6,7 +6,7 @@ data = defaultdict(lambda: {"x": [], "y": []})
 print(data)
 
 # Здесь можно запунить файл на тот, который вы хотите посмотреть
-with open("data/output.csv", "r") as f:
+with open("program_model1.csv", "r") as f:
     reader = csv.DictReader(f)
     
     for i, row in enumerate(reader):
