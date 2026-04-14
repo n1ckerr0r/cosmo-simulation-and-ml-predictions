@@ -5,7 +5,7 @@ from collections import defaultdict
 data = defaultdict(lambda: {"x": [], "y": []})
 print(data)
 
-with open("data/output_case5.csv", "r") as f:
+with open("data/output.csv", "r") as f:
     reader = csv.DictReader(f)
     
     for i, row in enumerate(reader):
