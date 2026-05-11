@@ -3,6 +3,7 @@ package output
 import (
 	"encoding/csv"
 	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/n1ckerr0r/cosmo-simulation-and-ml-predictions/modulation/internal/physics"
@@ -14,6 +15,12 @@ type Writer struct {
 }
 
 func NewWriter(path string) *Writer {
+	if dir := filepath.Dir(path); dir != "." {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			panic(err)
+		}
+	}
+
 	file, err := os.Create(path)
 	if err != nil {
 		panic(err)
@@ -49,4 +56,3 @@ func (w *Writer) Close() {
 func toStr(v float64) string {
 	return strconv.FormatFloat(v, 'e', 6, 64)
 }
-

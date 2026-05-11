@@ -9,37 +9,28 @@ import (
 )
 
 func main() {
-    bodies := []physics.Body{
-        {
-            Mass:     1.989e30,
-            Position: physics.Vector{X: 0, Y: 0, Z: 0},
-            Velocity: physics.Vector{X: 0, Y: 0, Z: 0},
-        },
-        {
-            Mass:     5.972e24,
-            Position: physics.Vector{X: 1.496e11, Y: 0, Z: 0},
-            Velocity: physics.Vector{X: 0, Y: 29780, Z: 0},
-        },
-    }
+	for _, scenario := range simulation.PlanetOrbitScenarios() {
+		runScenario(scenario)
+	}
 
-    acc := physics.CalculateAccelerations(bodies)
-    for i := range bodies {
-        bodies[i].Acceleration = acc[i]
-    }
+	fmt.Println("Simulation finished")
+}
 
-    engine := simulation.NewEngine(bodies, 60*60)
-    writer := output.NewWriter("data/output.csv")
-    defer writer.Close()
+func runScenario(scenario simulation.Scenario) {
+	bodies := simulation.PrepareBodies(scenario.Bodies)
+	engine := simulation.NewEngine(bodies, scenario.Dt)
+	writer := output.NewWriter(scenario.OutputPath)
+	defer writer.Close()
 
-    steps := 24 * 365 * 3
+	engine.Run(scenario.Steps, physics.Step, func(step int, bodies []physics.Body) {
+		if step%scenario.SampleEvery == 0 {
+			writer.Write(step, bodies)
+		}
+		if step%(scenario.SampleEvery*100) == 0 {
+			energy := physics.TotalEnergy(bodies)
+			fmt.Println("scenario:", scenario.Name, "step:", step, "energy:", energy)
+		}
+	})
 
-    engine.Run(steps, physics.Step, func(step int, bodies []physics.Body) {
-        if step%100 == 0 {
-            energy := physics.TotalEnergy(bodies)
-            fmt.Println("step:", step, "energy:", energy)
-        }
-        writer.Write(step, bodies)
-    })
-
-    fmt.Println("Simulation finished")
+	fmt.Println("saved:", scenario.OutputPath)
 }
